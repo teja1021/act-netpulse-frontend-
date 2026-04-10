@@ -62,7 +62,10 @@ export class SpeedTestService {
     }
 
     // Ping (always via our backend)
-    const { latency, jitter } = await this.measurePing();
+    // Ping: M-Lab WebSocket if available, else backend HTTP
+    const { latency, jitter } = mlabServer
+      ? await this.measurePingMLab(mlabServer.downloadUrl)
+      : await this.measurePingBackend();
     this.emit({ latency, jitter, progress: 14, phase: 'download' });
 
     // ── DOWNLOAD: M-Lab → Cloudflare → Backend ──
@@ -179,10 +182,62 @@ export class SpeedTestService {
   }
 
   // ══════════════════════════════════════════
-  // PING (via backend)
+  // PING — M-Lab WebSocket handshake RTT
   // ══════════════════════════════════════════
 
-  private async measurePing(): Promise<{ latency: number; jitter: number }> {
+  private async measurePingMLab(wsUrl: string): Promise<{ latency: number; jitter: number }> {
+    const ROUNDS = 10;
+
+    const measureOne = (): Promise<number> => new Promise((resolve, reject) => {
+      const t0 = performance.now();
+      let ws: WebSocket;
+      const timeout = setTimeout(() => { try { ws.close(); } catch {} reject(new Error('timeout')); }, 5000);
+      try {
+        ws = new WebSocket(wsUrl, 'net.measurementlab.ndt.v7');
+      } catch { clearTimeout(timeout); return reject(new Error('ws create failed')); }
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        const rtt = performance.now() - t0;
+        try { ws.close(); } catch {}
+        resolve(rtt);
+      };
+      ws.onerror = () => { clearTimeout(timeout); reject(new Error('ws error')); };
+    });
+
+    // Warmup — discard first connection
+    try { await measureOne(); } catch {}
+    await this.sleep(50);
+
+    const times: number[] = [];
+    for (let i = 0; i < ROUNDS; i++) {
+      try {
+        times.push(await measureOne());
+      } catch {}
+      await this.sleep(40);
+    }
+
+    if (times.length < 3) {
+      console.warn('[SpeedTest] M-Lab ping insufficient samples, falling back to backend');
+      return this.measurePingBackend();
+    }
+
+    times.sort((a, b) => a - b);
+    const trimmed = times.slice(1, -1);
+    const avg = trimmed.reduce((s, v) => s + v, 0) / trimmed.length;
+    const jitter = Math.sqrt(trimmed.reduce((s, v) => s + (v - avg) ** 2, 0) / trimmed.length);
+
+    console.log(`[SpeedTest] M-Lab ping: ${avg.toFixed(1)}ms, jitter: ${jitter.toFixed(1)}ms (${times.length} samples)`);
+    return {
+      latency: Math.round(avg * 10) / 10,
+      jitter: Math.round(jitter * 10) / 10
+    };
+  }
+
+  // ══════════════════════════════════════════
+  // PING — Backend HTTP fallback
+  // ══════════════════════════════════════════
+
+  private async measurePingBackend(): Promise<{ latency: number; jitter: number }> {
     try {
       await fetch(`${this.api}/speed/ping?_=${Date.now()}`, { cache: 'no-store' });
       await this.sleep(100);
