@@ -260,14 +260,14 @@ import { LogService } from '../../core/services/log.service';
     .st-layout { display:grid; grid-template-columns:1fr 370px; gap:20px; padding:24px 32px; max-width:1400px; margin:0 auto; }
 
     /* LEFT */
-    .st-left { padding:24px 24px 20px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .st-left { padding:24px 24px 20px; display:flex; flex-direction:column; align-items:center; gap:16px; }
     .meter-title { font-size:.7rem; font-weight:700; letter-spacing:.15em; color:var(--text2); }
 
     /* Canvas */
-    .canvas-wrap { position:relative; width:320px; height:195px; }
-    .canvas-wrap canvas { position:absolute; top:0; left:0; }
-    .speed-center { position:absolute; bottom:18px; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; }
-    .speed-big  { font-family:var(--font-d); font-size:3rem; font-weight:800; color:var(--text); line-height:1; }
+    .canvas-wrap { position:relative; width:320px; height:195px; margin:0 auto; }
+    .canvas-wrap canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+    .speed-center { position:absolute; bottom:36px; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; }
+    .speed-big  { font-family:var(--font-d); font-size:2.2rem; font-weight:800; color:var(--text); line-height:1; }
     .speed-unit { font-size:.78rem; font-weight:600; color:var(--text2); letter-spacing:.06em; }
 
     /* Metrics */
@@ -405,6 +405,46 @@ import { LogService } from '../../core/services/log.service';
     @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
     @media(max-width:1100px) { .st-layout { grid-template-columns:1fr; } .canvas-wrap { width:290px; height:180px; } .speed-big { font-size:2.7rem; } }
+
+    @media(max-width:680px) {
+      .hero-banner{padding:24px 16px 28px}
+      .hero-banner h1{font-size:1.6rem}
+      .hero-banner p{font-size:.78rem}
+      .st-layout{padding:14px 10px;gap:14px}
+      .st-left{padding:16px 12px 14px;gap:14px}
+      .canvas-wrap{width:min(280px, 80vw);height:0;padding-bottom:calc(min(280px, 80vw) * 195 / 320);margin:0 auto}
+      .speed-center{bottom:20%;left:50%;transform:translateX(-50%)}
+      .speed-big{font-size:1.6rem}
+      .speed-unit{font-size:.65rem}
+      .meter-title{font-size:.6rem}
+      .metric-row{grid-template-columns:repeat(3,1fr);gap:6px;width:100%}
+      .metric-box{padding:10px 6px}
+      .mb-label{font-size:.5rem;letter-spacing:.06em;margin-bottom:4px}
+      .mb-line{width:18px;height:2.5px;margin-bottom:4px}
+      .mb-val{font-size:1.05rem}
+      .mb-unit{font-size:.6rem}
+      .start-btn{padding:14px;font-size:.88rem}
+      .step-item{padding:8px 10px;font-size:.78rem;gap:8px}
+      .step-num{width:22px;height:22px;font-size:.7rem}
+      .jitter-row{flex-wrap:wrap;justify-content:center;font-size:.72rem}
+      .st-right{gap:12px}
+      .plan-card,.perf-card{padding:14px}
+      .pc-head h3{font-size:.95rem}
+      .plan-box{padding:12px}
+      .pb-speed strong{font-size:1.6rem}
+      .circle-row{transform:scale(.82);transform-origin:center}
+      .perf-result{padding:10px;gap:8px}
+      .pr-emoji{font-size:1.3rem}
+      .pr-pct{font-size:1.4rem}
+      .pr-grade{font-size:1.05rem}
+      .pr-desc{font-size:.7rem}
+      .perf-stats{padding:9px 10px}
+      .ps-row{font-size:.76rem}
+      .isp-card{padding:12px 14px;gap:10px}
+      .isp-icon{width:36px;height:36px}
+      .isp-name{font-size:.82rem}
+      .isp-sub{font-size:.66rem}
+    }
   `]
 })
 export class SpeedTestComponent implements AfterViewInit, OnDestroy {
