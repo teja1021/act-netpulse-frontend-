@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, computed, signal, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { NgComponentOutlet } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
@@ -49,10 +49,28 @@ import type { AiInsightsComponent } from '../../features/ai-insights/ai-insights
       </a>
 
       <div class="nav-links">
-        @for (item of navItems; track item.path) {
-          <a [routerLink]="item.path" routerLinkActive="nav-active" class="nav-link">{{ item.label }}</a>
+        <!-- Speed Test always visible -->
+        <a routerLink="/speed-test" routerLinkActive="nav-active" class="nav-link nav-pinned">Speed Test</a>
+
+        <!-- Other links: visible on desktop, hidden in menu on mobile -->
+        @for (item of menuItems; track item.path) {
+          <a [routerLink]="item.path" routerLinkActive="nav-active" class="nav-link nav-menu-item">{{ item.label }}</a>
         }
+
+        <!-- Hamburger button (mobile only, inside center group) -->
+        <button class="hamburger" (click)="toggleMenu()" [class.ham-open]="menuOpen()">
+          <span></span><span></span><span></span>
+        </button>
       </div>
+
+      <!-- Mobile dropdown menu -->
+      @if (menuOpen()) {
+        <div class="mobile-menu">
+          @for (item of menuItems; track item.path) {
+            <a [routerLink]="item.path" routerLinkActive="nav-active" class="mm-link" (click)="menuOpen.set(false)">{{ item.label }}</a>
+          }
+        </div>
+      }
 
       <div class="nav-right">
         <div class="plan-pill">
@@ -242,6 +260,16 @@ import type { AiInsightsComponent } from '../../features/ai-insights/ai-insights
     .ai-panel{position:fixed;bottom:86px;right:28px;z-index:360;width:460px;max-height:72vh;background:var(--white);border-radius:var(--r-xl);box-shadow:0 16px 60px rgba(0,0,0,.2);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;animation:ps .2s ease}
     @keyframes ps{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
+    /* Mobile menu dropdown */
+    .mobile-menu{display:none}
+
+    /* Hamburger - hidden on desktop */
+    .hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;z-index:210;flex-direction:column;gap:5px}
+    .hamburger span{display:block;width:22px;height:2.5px;background:rgba(255,255,255,.85);border-radius:2px;transition:all .25s ease}
+    .hamburger.ham-open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .hamburger.ham-open span:nth-child(2){opacity:0}
+    .hamburger.ham-open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
     @media(max-width:900px){
       .plan-pill{display:none}
       .nav-inner{padding:0 14px}
@@ -249,6 +277,56 @@ import type { AiInsightsComponent } from '../../features/ai-insights/ai-insights
       .logo{margin-right:16px}
       .ai-panel{right:10px;left:10px;width:auto}
       .ai-fab{bottom:20px;right:20px}
+    }
+
+    @media(max-width:680px){
+      /* NAV: show hamburger, hide menu items in nav-links, keep Speed Test */
+      .hamburger{display:flex}
+      .nav-inner{height:50px;padding:0 12px;justify-content:space-between}
+      .logo{margin-right:0;flex-shrink:0}
+      .logo-np{height:36px}
+
+      /* Center group: Speed Test + hamburger centered */
+      .nav-links{position:static;left:auto;transform:none;margin:0;gap:6px;flex:1;justify-content:center}
+      .nav-menu-item{display:none}
+      .nav-pinned{padding:6px 14px;font-size:.82rem}
+
+      /* Mobile dropdown */
+      .mobile-menu{
+        display:flex;flex-direction:column;position:fixed;top:50px;left:0;right:0;
+        background:var(--navy);padding:6px 0;z-index:205;
+        border-bottom:1px solid rgba(255,255,255,.1);
+        box-shadow:0 8px 24px rgba(0,0,0,.3);
+        animation:menuSlide .15s ease;
+      }
+      @keyframes menuSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+      .mm-link{
+        padding:14px 20px;font-size:.92rem;color:rgba(255,255,255,.7);
+        text-decoration:none;font-weight:600;transition:all .12s;
+      }
+      .mm-link:hover{background:rgba(255,255,255,.06);color:#fff}
+      .mm-link.nav-active{background:var(--red);color:#fff}
+
+      .nav-right{flex-shrink:0;margin-left:0;gap:8px}
+      .profile-av{width:30px;height:30px;font-size:.85rem;border-width:2px}
+      .profile-dropdown{right:-8px;width:200px}
+
+      /* FOOTER */
+      .footer{padding:20px 16px 14px}
+      .ft-row{flex-direction:column;gap:14px;align-items:center;text-align:center}
+      .ft-left,.ft-center,.ft-right{position:static;transform:none;text-align:center;margin-left:0}
+      .ft-brand{justify-content:center}
+      .ft-act-link,.ft-netpulse{font-size:1.2rem}
+      .ft-social{gap:16px}
+      .ft-social a{width:34px;height:34px}
+      .ft-tagline{max-width:100%;font-size:.68rem;text-align:center}
+      .ft-bottom{flex-wrap:wrap;justify-content:center}
+      .ft-divider{margin:12px 0 8px}
+
+      /* AI PANEL: bottom sheet */
+      .ai-panel{bottom:0;right:0;left:0;top:auto;width:100%;max-height:85vh;border-radius:16px 16px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
+      .ai-fab{bottom:16px;right:16px;padding:10px 16px;font-size:.8rem;border-radius:24px}
+      .ai-fab.fab-open{width:40px;height:40px}
     }
   `]
 })
@@ -262,6 +340,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   user = this.auth.currentUser;
   initial = computed(() => (this.user()?.name ?? 'U').charAt(0).toUpperCase());
   profileOpen = signal(false);
+  menuOpen = signal(false);
   isOffline = signal(!navigator.onLine);
   aiComp: any = null;
 
@@ -270,6 +349,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   navItems = [
     { path: '/speed-test', label: 'Speed Test' },
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/history', label: 'History' },
+    { path: '/settings', label: 'Settings' }
+  ];
+
+  menuItems = [
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/history', label: 'History' },
     { path: '/settings', label: 'Settings' }
@@ -294,5 +379,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   toggleProfile() { this.profileOpen.update(v => !v); }
   closeProfile() { this.profileOpen.set(false); }
+  toggleMenu() { this.menuOpen.update(v => !v); }
   logout() { this.auth.logout(); this.profileOpen.set(false); }
+
+  @HostListener('document:click', ['$event'])
+  onDocClick(e: Event) {
+    const t = e.target as HTMLElement;
+    if (this.menuOpen() && !t.closest('.hamburger') && !t.closest('.mobile-menu')) {
+      this.menuOpen.set(false);
+    }
+  }
 }
