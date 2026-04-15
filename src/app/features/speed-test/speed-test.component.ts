@@ -244,7 +244,7 @@ import { LogService } from '../../core/services/log.service';
       </div>
       <div>
         <div class="isp-name">{{ user()?.plan?.isp }} — {{ user()?.plan?.city }}</div>
-        <div class="isp-sub">{{ user()?.plan?.name }} · UDP/TCP</div>
+        <div class="isp-sub">{{ user()?.plan?.name }}</div>
       </div>
     </div>
   </div>
