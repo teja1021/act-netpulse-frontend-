@@ -124,6 +124,41 @@ import { LogService } from '../../core/services/log.service';
         <span class="jitter-val">{{ st().server ? st().server!.city + ', ' + st().server!.country + ' (M-Lab)' : 'Localhost' }}</span>
       </div>
     }
+
+    <!-- ═══════════════════════════════════════════════
+         SPEED SUMMARY CARD (only after test completes)
+         ═══════════════════════════════════════════════ -->
+    @if (st().phase === 'done' && st().download > 0) {
+      <div class="card speed-summary-card">
+
+        <div class="ssc-head">
+          <span class="ssc-icon">⚡</span>
+          <h3>Speed Summary</h3>
+        </div>
+
+        <div class="info-title">
+          <span class="info-icon">🌐</span>
+          <span>How is my internet connection?</span>
+        </div>
+
+        <div class="speed-result-box" [class]="speedSummaryClass()">
+          <div class="srb-content">
+            <div class="srb-title">{{ speedGrade().title }}</div>
+          </div>
+          <div class="srb-mbps">{{ st().download }}<span>Mbps</span></div>
+        </div>
+
+        <div class="what-title">
+          <span class="what-icon">?</span>
+          What can I do with this connection?
+        </div>
+        <div class="what-box">
+          <div class="speed-detail-text" [innerHTML]="speedGrade().desc"></div>
+        </div>
+
+      </div>
+    }
+
   </div>
 
   <!-- RIGHT COLUMN -->
@@ -190,6 +225,9 @@ import { LogService } from '../../core/services/log.service';
       </div>
     </div>
 
+    <div>
+
+  </div>
     <!-- Performance Rating Card -->
     <div class="card perf-card">
       <div class="pc-head">
@@ -316,6 +354,91 @@ import { LogService } from '../../core/services/log.service';
     .jitter-val { font-weight:600; color:var(--text); }
     .jitter-sep { color:var(--border); }
 
+    /* ── Speed Summary Card ────────────────────────── */
+    .speed-summary-card { width:100%; padding:20px; animation:fadeUp .35s ease; }
+    .ssc-head { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+    .ssc-head h3 { font-family:var(--font-d); font-size:1.18rem; font-weight:800; color:var(--text); }
+    .ssc-icon { font-size:1.05rem; }
+
+    .info-title {
+      display:flex; align-items:center; gap:10px;
+      margin-bottom:18px; font-weight:600; color:var(--text2);
+      font-size:.82rem; line-height:1.4;
+    }
+
+    /* Connection quality banner */
+    .speed-result-box {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 16px; border-radius:var(--r-lg); border:1.5px solid;
+      margin-bottom:12px;
+    }
+    .srb-content { flex:1; min-width:0; }
+    .srb-title {
+      font-size:.85rem; font-weight:700; line-height:1.4; color:inherit;
+      margin-bottom:6px;
+    }
+    .srb-mbps {
+      font-family:var(--font-d); font-size:1.3rem; font-weight:800; flex-shrink:0; line-height:1;
+    }
+    .srb-mbps span { font-size:.45rem; font-weight:600; margin-left:2px; opacity:.75; }
+
+    .info-icon {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px; height:24px; border-radius:8px;
+      background:transparent; color:var(--text);
+      font-size:1rem;
+    }
+    .what-title {
+      display:flex; align-items:center; gap:8px;
+      font-size:.82rem; font-weight:600;
+      margin-bottom:10px; color:var(--text2);
+    }
+    .what-icon {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:6px;
+      background:transparent; color:#2563eb;
+      font-size:.75rem; font-weight:700;
+    }
+    .what-box {
+      background:rgba(241,245,249,.95);
+      border:1px solid rgba(100,116,139,.55);
+      border-radius:var(--r-md);
+      padding:14px 16px;
+    }
+    .speed-detail-text {
+      font-size:.82rem; line-height:1.6; padding:0;
+      color:var(--text); font-weight:400;
+    }
+
+    /* Colour variants — banner bg + border + text colours */
+    .ss-outstanding { background:rgba(34,197,94,.09); border-color:rgba(34,197,94,.3); }
+    .ss-outstanding .srb-title { color:#15803d; }
+    .ss-outstanding .srb-mbps  { color:#16a34a; }
+
+    .ss-excellent { background:rgba(34,197,94,.09); border-color:rgba(34,197,94,.3); }
+    .ss-excellent .srb-title { color:#15803d; }
+    .ss-excellent .srb-mbps  { color:#16a34a; }
+
+    .ss-very-good { background:rgba(134,239,172,.1); border-color:rgba(34,197,94,.22); }
+    .ss-very-good .srb-title { color:#16a34a; }
+    .ss-very-good .srb-mbps  { color:#22c55e; }
+
+    .ss-good { background:rgba(217,119,6,.09); border-color:rgba(217,119,6,.28); }
+    .ss-good .srb-title { color:#92400e; }
+    .ss-good .srb-mbps  { color:#b45309; }
+
+    .ss-fair { background:rgba(217,119,6,.09); border-color:rgba(217,119,6,.28); }
+    .ss-fair .srb-title { color:#92400e; }
+    .ss-fair .srb-mbps  { color:#b45309; }
+
+    .ss-slow { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.28); }
+    .ss-slow .srb-title { color:#b91c1c; }
+    .ss-slow .srb-mbps  { color:#dc2626; }
+
+    .ss-very-slow { background:rgba(220,38,38,.08); border-color:rgba(220,38,38,.28); }
+    .ss-very-slow .srb-title { color:#991b1b; }
+    .ss-very-slow .srb-mbps  { color:#b91c1c; }
+
     /* RIGHT */
     .st-right { display:flex; flex-direction:column; gap:16px; }
 
@@ -427,6 +550,15 @@ import { LogService } from '../../core/services/log.service';
       .step-item{padding:8px 10px;font-size:.78rem;gap:8px}
       .step-num{width:22px;height:22px;font-size:.7rem}
       .jitter-row{flex-wrap:wrap;justify-content:center;font-size:.72rem}
+      .speed-summary-card{padding:14px}
+      .ssc-head h3{font-size:.88rem}
+      .speed-result-box{padding:11px 13px;gap:10px;margin-bottom:10px}
+      .srb-title{font-size:.78rem}
+      .srb-mbps{font-size:1.45rem}
+      .srb-mbps span{font-size:.58rem}
+      .ssc-usage-box{padding:10px 11px}
+      .ssc-usage-label{font-size:.6rem}
+      .ssc-usage-text{font-size:.74rem}
       .st-right{gap:12px}
       .plan-card,.perf-card{padding:14px}
       .pc-head h3{font-size:.95rem}
@@ -484,8 +616,55 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     const p = this.dlPct();
     if (p >= 90) return 'Excellent! Delivering near-plan speed.';
     if (p >= 70) return 'Good performance from your plan.';
-    if (p >= 50) return 'Average — congestion may be present.';
-    return 'Below average. Consider contacting your ISP.';
+    if (p >= 50) return 'Average — speeds are below plan expectations.';
+    return 'Below average. Consider contacting your Act\'s Network Engineer.';
+  });
+
+  speedGrade = computed(() => {
+    const dl = this.st().download;
+    if (dl >= 300) return {
+      grade: 'Looks Outstanding',
+      title: 'Your internet connection is outstanding.',
+      desc: 'Your connection should effortlessly handle ultra-fast downloads, many simultaneous users, online gaming, and 4K/8K streaming all at the same time.'
+    };
+    if (dl >= 100) return {
+      grade: 'Looks Excellent',
+      title: 'Your internet connection is excellent.',
+      desc: 'Your connection should comfortably support multiple 4K video streams, intense gaming, fast downloads, and numerous connected devices.'
+    };
+    if (dl >= 50) return {
+      grade: 'Looks Very Good',
+      title: 'Your internet connection is very fast.',
+      desc: 'Your connection should handle 4K video streaming, online gaming, fast downloads, and support several devices simultaneously.'
+    };
+    if (dl >= 25) return {
+      grade: 'Looks Good',
+      title: 'Your internet connection is fast.',
+      desc: 'Your connection should handle HD video streaming, video calls, online gaming, and multiple devices at the same time.'
+    };
+    if (dl >= 10) return {
+      grade: 'Looks Fair',
+      title: 'Your internet connection is fair.',
+      desc: 'Your connection should handle HD videos and video calls on 1–2 devices. Smooth performance for standard streaming.'
+    };
+    if (dl >= 5) return {
+      grade: 'Looks Slow',
+      title: 'Your internet connection is slow.',
+      desc: 'Your connection should handle basic web browsing and lower-quality video streaming on one device at a time.'
+    };
+    return {
+      grade: 'Looks Very Slow',
+      title: 'Your internet connection is very slow.',
+      desc: 'Your connection is suitable for basic browsing and messaging. Video streaming may experience buffering.'
+    };
+  });
+
+  speedSummaryClass = computed(() => {
+    const grade = this.speedGrade().grade
+      .replace(/^looks\s+/i, '')
+      .toLowerCase()
+      .replace(/\s+/g, '-');
+    return 'ss-' + grade;
   });
 
   isStepDone(phase: string): boolean {
@@ -505,7 +684,6 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     this.svc.reset();
     try {
       const result = await this.svc.runTest();
-      // AUTO-SAVE immediately after test completes
       this.autoSave(result);
     } catch (e: any) {
       if (e?.message === 'OFFLINE') {
@@ -516,9 +694,7 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  dismissOffline() {
-    this.offline.set(false);
-  }
+  dismissOffline() { this.offline.set(false); }
 
   retryConnection() {
     this.offline.set(false);
@@ -529,7 +705,6 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     const u = this.user();
     if (!u) return;
 
-    // Determine combined test path
     let testPath: 'mlab' | 'cdn' | 'backend' | 'mixed' = 'backend';
     if (s.downloadPath === 'mlab' && s.uploadPath === 'mlab') testPath = 'mlab';
     else if (s.downloadPath === 'cdn' && s.uploadPath === 'cdn') testPath = 'cdn';
@@ -551,9 +726,7 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
       planUpload: u.plan.upload
     }).subscribe({
       next: () => this.autoSaved.set(true),
-      error: (err) => {
-        console.error('[SpeedTest] Failed to save results:', err.status, err.message);
-      }
+      error: (err) => console.error('[SpeedTest] Failed to save results:', err.status, err.message)
     });
   }
 
@@ -580,11 +753,9 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     const frac = Math.min(1, spd / max);
     const sA = Math.PI, nA = sA + frac * Math.PI;
 
-    // Background arc
     ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI, 2 * Math.PI);
     ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 20; ctx.lineCap = 'round'; ctx.stroke();
 
-    // Colored zone arcs
     const zones = [
       { from: 0, to: .5, color: '#fecaca' },
       { from: .5, to: .7, color: '#fde68a' },
@@ -597,20 +768,17 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
       ctx.strokeStyle = z.color; ctx.lineWidth = 16; ctx.lineCap = 'butt'; ctx.stroke();
     });
 
-    // Zone boundary dots
     [{ at: .5, c: '#f59e0b' }, { at: .7, c: '#22c55e' }, { at: .9, c: '#16a34a' }].forEach(d => {
       const a = sA + d.at * Math.PI;
       ctx.beginPath(); ctx.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 5, 0, 2 * Math.PI);
       ctx.fillStyle = d.c; ctx.fill();
     });
 
-    // End dots
     ctx.beginPath(); ctx.arc(cx + Math.cos(sA) * R, cy + Math.sin(sA) * R, 6, 0, 2 * Math.PI);
     ctx.fillStyle = '#e2001a'; ctx.fill();
     ctx.beginPath(); ctx.arc(cx + Math.cos(2 * Math.PI) * R, cy + Math.sin(2 * Math.PI) * R, 6, 0, 2 * Math.PI);
     ctx.fillStyle = '#16a34a'; ctx.fill();
 
-    // Ticks + labels
     for (let i = 0; i <= 10; i++) {
       const a = Math.PI + (i / 10) * Math.PI, maj = i % 2 === 0;
       ctx.beginPath();
@@ -624,7 +792,6 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    // Needle
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 5;
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(nA - .04) * 11, cy + Math.sin(nA - .04) * 11);
@@ -632,7 +799,6 @@ export class SpeedTestComponent implements AfterViewInit, OnDestroy {
     ctx.lineTo(cx + Math.cos(nA + .04) * 11, cy + Math.sin(nA + .04) * 11);
     ctx.closePath(); ctx.fillStyle = '#111827'; ctx.fill(); ctx.restore();
 
-    // Hub
     ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 2 * Math.PI); ctx.fillStyle = '#1f2937'; ctx.fill();
     ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 2 * Math.PI); ctx.fillStyle = '#fff'; ctx.fill();
   }
